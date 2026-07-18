@@ -60,3 +60,5 @@ Plus a master switch in the popup header to disable everything at once.
   language to `AD_LABELS` in [src/content.js](src/content.js) if needed.
 - "Default to Following" assumes Following is the second tab on home (X's default
   layout, also with pinned lists).
+
+If you find any bugs, errors or missing features you would like to see in the extension, message me on [X](x.com/gsotooo_) or drop me an email at gonsotomayor@gmail.com
