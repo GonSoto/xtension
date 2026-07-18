@@ -27,9 +27,13 @@ html[data-dx-on][data-dx-hide-sidebar] [data-testid="sidebarColumn"] {
   display: none !important;
 }
 
-/* Trends / "What's happening" card. */
-html[data-dx-on][data-dx-hide-trends] [data-testid="sidebarColumn"] section:has([data-testid="trend"]),
-html[data-dx-on][data-dx-hide-trends] [data-testid="sidebarColumn"] div[aria-label]:has([data-testid="trend"]) {
+/* Trends / "What's happening" card. The div[aria-label] variant is guarded
+   against matching a shared wrapper that also holds the search box — without
+   it, this rule was taking the search bar down along with trends. content.js
+   additionally climbs to the narrowest wrapper dynamically, which is the
+   primary mechanism; this CSS rule is a fast-path bonus. */
+html[data-dx-on][data-dx-hide-trends] [data-testid="sidebarColumn"] section:has([data-testid="trend"]):not(:has(form[role="search"])),
+html[data-dx-on][data-dx-hide-trends] [data-testid="sidebarColumn"] div[aria-label]:has([data-testid="trend"]):not(:has(form[role="search"])) {
   display: none !important;
 }
 

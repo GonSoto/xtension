@@ -146,15 +146,53 @@
   }
 
   // Walk up from a sidebar card to the outermost wrapper that contains nothing
-  // else, so hiding it doesn't leave an empty bordered box behind.
-  function outermostLoneWrapper(el, boundary) {
+  // else, so hiding it doesn't leave an empty bordered box behind. `stopAt`,
+  // if given, halts the climb before absorbing an ancestor that shouldn't be
+  // hidden (e.g. one that also wraps the search box).
+  function outermostLoneWrapper(el, boundary, stopAt) {
     let target = el;
     let parent = target.parentElement;
-    while (parent && parent !== boundary && parent.childElementCount === 1) {
+    while (
+      parent &&
+      parent !== boundary &&
+      parent.childElementCount === 1 &&
+      !(stopAt && stopAt(parent))
+    ) {
       target = parent;
       parent = parent.parentElement;
     }
     return target;
+  }
+
+  function hasSearchBox(el) {
+    return !!el.querySelector('form[role="search"], input[data-testid="SearchBox_Search_Input"]');
+  }
+
+  function handleTrends() {
+    if (!settings.hideTrends) {
+      clearMarks('trend');
+      return;
+    }
+    const sidebar = document.querySelector('[data-testid="sidebarColumn"]');
+    if (!sidebar) return;
+    const trend = sidebar.querySelector('[data-testid="trend"]');
+    if (!trend) return;
+    // Find the trends widget's own landmark (a <section>, or a div carrying
+    // its own aria-label) — never one that also wraps the search box, which
+    // is the shared-wrapper bug this guards against. Mirrors the CSS rule in
+    // hide.css as a dynamic fallback for whatever markup X actually serves.
+    let node = trend;
+    let widget = null;
+    while (node && node !== sidebar) {
+      if ((node.tagName === 'SECTION' || node.hasAttribute('aria-label')) && !hasSearchBox(node)) {
+        widget = node;
+        break;
+      }
+      node = node.parentElement;
+    }
+    if (widget) {
+      outermostLoneWrapper(widget, sidebar, hasSearchBox).setAttribute('data-dx-hidden', 'trend');
+    }
   }
 
   function handleSidebarCards() {
@@ -253,6 +291,7 @@
     handleAds();
     handleDiscoverMore();
     handleBadges();
+    handleTrends();
     handleSidebarCards();
     handleDMDrawer();
     cleanTitle();
@@ -303,6 +342,7 @@
       clearMarks('ad');
       clearMarks('discover');
       clearMarks('badge');
+      clearMarks('trend');
       clearMarks('card-wtf');
       clearMarks('card-premium');
       clearMarks('dm');
