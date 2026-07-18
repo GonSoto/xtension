@@ -52,36 +52,34 @@ html[data-dx-on][data-dx-hide-premium][data-dx-page="home"] main [data-testid="p
 }
 
 /* --- Left navigation ----------------------------------------------------- */
+/* X restructures primary navigation by viewport width: a labeled sidebar on
+   wide desktop, an icon-only rail as the window narrows, and a bottom tab bar
+   below roughly mobile-web widths — plus items can be tucked into the "More"
+   flyout menu (rendered in a portal, outside any nav landmark) depending on
+   the account. Rather than chase each container, every rule below matches on
+   href/data-testid alone, anywhere in the document, which is stable across
+   all of those layouts. The `:not(article a)` guard keeps this from ever
+   matching a link a user posted or pasted into their own bio/tweet, since
+   real nav items are never rendered inside a post's <article>. */
 
-html[data-dx-on][data-dx-hide-nav-explore] header[role="banner"] nav a[href="/explore"],
-html[data-dx-on][data-dx-hide-nav-explore] header[role="banner"] nav a[data-testid="AppTabBar_Explore_Link"] {
+html[data-dx-on][data-dx-hide-nav-explore] a[href="/explore"]:not(article a),
+html[data-dx-on][data-dx-hide-nav-explore] a[data-testid$="AppTabBar_Explore_Link"]:not(article a) {
   display: none !important;
 }
 
-/* Communities / Jobs / Premium can live in the nav bar itself or inside the
-   "More" dropdown menu (rendered in a portal, outside the header), depending
-   on the account — cover both. */
-html[data-dx-on][data-dx-hide-nav-communities] header[role="banner"] nav a[href$="/communities"],
-html[data-dx-on][data-dx-hide-nav-communities] a[role="menuitem"][href$="/communities"],
-html[data-dx-on][data-dx-hide-nav-communities] [data-testid="Dropdown"] a[href$="/communities"] {
+html[data-dx-on][data-dx-hide-nav-communities] a[href$="/communities"]:not(article a),
+html[data-dx-on][data-dx-hide-nav-communities] a[data-testid$="AppTabBar_Communities_Link"]:not(article a) {
   display: none !important;
 }
 
-html[data-dx-on][data-dx-hide-nav-premium] header[role="banner"] nav a[href^="/i/premium"],
-html[data-dx-on][data-dx-hide-nav-premium] header[role="banner"] nav a[href^="/i/verified-orgs"],
-html[data-dx-on][data-dx-hide-nav-premium] header[role="banner"] nav a[href^="/i/monetization"],
-html[data-dx-on][data-dx-hide-nav-premium] a[role="menuitem"][href^="/i/premium"],
-html[data-dx-on][data-dx-hide-nav-premium] a[role="menuitem"][href^="/i/verified-orgs"],
-html[data-dx-on][data-dx-hide-nav-premium] a[role="menuitem"][href^="/i/monetization"],
-html[data-dx-on][data-dx-hide-nav-premium] [data-testid="Dropdown"] a[href^="/i/premium"],
-html[data-dx-on][data-dx-hide-nav-premium] [data-testid="Dropdown"] a[href^="/i/verified-orgs"],
-html[data-dx-on][data-dx-hide-nav-premium] [data-testid="Dropdown"] a[href^="/i/monetization"] {
+html[data-dx-on][data-dx-hide-nav-premium] a[href^="/i/premium"]:not(article a),
+html[data-dx-on][data-dx-hide-nav-premium] a[href^="/i/verified-orgs"]:not(article a),
+html[data-dx-on][data-dx-hide-nav-premium] a[href^="/i/monetization"]:not(article a) {
   display: none !important;
 }
 
-html[data-dx-on][data-dx-hide-nav-jobs] header[role="banner"] nav a[href^="/jobs"],
-html[data-dx-on][data-dx-hide-nav-jobs] a[role="menuitem"][href^="/jobs"],
-html[data-dx-on][data-dx-hide-nav-jobs] [data-testid="Dropdown"] a[href^="/jobs"] {
+html[data-dx-on][data-dx-hide-nav-jobs] a[href^="/jobs"]:not(article a),
+html[data-dx-on][data-dx-hide-nav-jobs] a[data-testid$="AppTabBar_Jobs_Link"]:not(article a) {
   display: none !important;
 }
 

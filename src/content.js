@@ -44,10 +44,21 @@
   ];
 
   let settings = { ...DX_DEFAULTS };
+  let pauseUntil = 0;
   let page = '';
   let lastHref = '';
   let forcedFollowing = false;
   let scanTimer = null;
+
+  function isPaused() {
+    return pauseUntil > Date.now();
+  }
+
+  // Master on/off, factoring in a temporary pause. `settings.enabled` (the
+  // user's actual saved preference) is never mutated by pausing.
+  function isOn() {
+    return settings.enabled && !isPaused();
+  }
 
   function computePage() {
     const p = location.pathname;
@@ -115,8 +126,12 @@
       clearMarks('badge');
       return;
     }
-    // Unread pills in the left nav are small divs whose only content is a number.
-    for (const a of document.querySelectorAll('header[role="banner"] a')) {
+    // Unread pills in the left nav are small divs whose only content is a
+    // number. Scan both the wide-desktop header nav and the bottom tab bar
+    // X switches to at narrower widths, since either may hold it.
+    for (const a of document.querySelectorAll(
+      'header[role="banner"] a, [data-testid*="AppTabBar"] a'
+    )) {
       for (const span of a.querySelectorAll('span')) {
         const text = span.textContent.trim();
         if (!/^\d+\+?$/.test(text)) continue;
@@ -234,7 +249,7 @@
   // --- Orchestration ------------------------------------------------------
 
   function scan() {
-    if (!settings.enabled || !document.body) return;
+    if (!isOn() || !document.body) return;
     handleAds();
     handleDiscoverMore();
     handleBadges();
@@ -260,28 +275,31 @@
     if (navigated) forcedFollowing = false;
     page = computePage();
     html.setAttribute('data-dx-page', page);
-    if (settings.enabled && settings.blockExplore && page === 'explore') {
+    if (isOn() && settings.blockExplore && page === 'explore') {
       location.replace(location.origin + '/home');
       return;
     }
     scheduleScan();
   }
 
-  function applySettings(next) {
-    settings = { ...DX_DEFAULTS, ...next };
-    if (settings.enabled) {
+  // Re-applies the current on/off + per-toggle state to the DOM. Called
+  // whenever settings change, a pause starts/ends, or on init — never mutates
+  // settings/pauseUntil itself, just reflects whatever they currently are.
+  function refresh() {
+    const on = isOn();
+    if (on) {
       html.setAttribute('data-dx-on', '');
     } else {
       html.removeAttribute('data-dx-on');
     }
     for (const [key, attr] of Object.entries(ATTRS)) {
-      if (settings.enabled && settings[key]) {
+      if (on && settings[key]) {
         html.setAttribute(attr, '');
       } else {
         html.removeAttribute(attr);
       }
     }
-    if (!settings.enabled) {
+    if (!on) {
       clearMarks('ad');
       clearMarks('discover');
       clearMarks('badge');
@@ -294,13 +312,27 @@
     checkRoute(true);
   }
 
+  function applySettings(next) {
+    settings = { ...DX_DEFAULTS, ...next };
+    refresh();
+  }
+
+  function applyPause(next) {
+    pauseUntil = next > Date.now() ? next : 0;
+    refresh();
+  }
+
   chrome.storage.sync.get(DX_DEFAULTS, (stored) => applySettings(stored));
+  chrome.storage.local.get({ pauseUntil: 0 }, (stored) => applyPause(stored.pauseUntil));
 
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area !== 'sync') return;
-    const next = { ...settings };
-    for (const [key, change] of Object.entries(changes)) next[key] = change.newValue;
-    applySettings(next);
+    if (area === 'sync') {
+      const next = { ...settings };
+      for (const [key, change] of Object.entries(changes)) next[key] = change.newValue;
+      applySettings(next);
+    } else if (area === 'local' && changes.pauseUntil) {
+      applyPause(changes.pauseUntil.newValue || 0);
+    }
   });
 
   new MutationObserver(scheduleScan).observe(html, {
@@ -310,10 +342,18 @@
   });
 
   // X is a SPA: watch soft navigations. The Navigation API catches pushState;
-  // the interval is a cheap fallback.
+  // the interval is a cheap fallback. The same interval doubles as the pause
+  // timer's expiry check, since a pause ending isn't a storage event.
   if (window.navigation) {
     window.navigation.addEventListener('navigate', () => setTimeout(() => checkRoute(false), 0));
   }
-  setInterval(() => checkRoute(false), 500);
+  setInterval(() => {
+    if (pauseUntil && Date.now() >= pauseUntil) {
+      pauseUntil = 0;
+      chrome.storage.local.remove('pauseUntil');
+      refresh();
+    }
+    checkRoute(false);
+  }, 500);
   checkRoute(true);
 })();

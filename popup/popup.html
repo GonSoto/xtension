@@ -14,6 +14,22 @@
       <span class="slider"></span>
     </label>
   </header>
+  <div id="pauseBar" class="pause-bar">
+    <div id="pauseControls" class="pause-controls">
+      <button id="pause5" class="pause-btn" type="button">Pause 5 min</button>
+      <button id="pauseCustomBtn" class="pause-btn" type="button">Pause…</button>
+    </div>
+    <div id="pauseCustomRow" class="pause-custom-row" hidden>
+      <input id="pauseMinutes" class="pause-input" type="number" min="1" max="480" value="15" aria-label="Minutes to pause">
+      <span class="pause-unit">min</span>
+      <button id="pauseCustomStart" class="pause-btn pause-btn-primary" type="button">Start</button>
+      <button id="pauseCustomCancel" class="pause-btn-text" type="button">Cancel</button>
+    </div>
+    <div id="pauseActiveRow" class="pause-active-row" hidden>
+      <span class="pause-active-label">Paused — resumes in <strong id="pauseCountdown">5:00</strong></span>
+      <button id="pauseResumeBtn" class="pause-btn-text" type="button">Resume now</button>
+    </div>
+  </div>
   <main id="list"></main>
   <footer>
     Changes apply instantly — no reload needed.<br>

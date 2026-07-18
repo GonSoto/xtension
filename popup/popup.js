@@ -44,6 +44,17 @@ const SECTIONS = [
 
 const list = document.getElementById('list');
 const master = document.getElementById('master');
+const pauseBar = document.getElementById('pauseBar');
+const pauseControls = document.getElementById('pauseControls');
+const pauseCustomRow = document.getElementById('pauseCustomRow');
+const pauseActiveRow = document.getElementById('pauseActiveRow');
+const pauseCountdown = document.getElementById('pauseCountdown');
+const pause5 = document.getElementById('pause5');
+const pauseCustomBtn = document.getElementById('pauseCustomBtn');
+const pauseMinutes = document.getElementById('pauseMinutes');
+const pauseCustomStart = document.getElementById('pauseCustomStart');
+const pauseCustomCancel = document.getElementById('pauseCustomCancel');
+const pauseResumeBtn = document.getElementById('pauseResumeBtn');
 
 function buildRow(key, label, hint) {
   const row = document.createElement('label');
@@ -94,12 +105,81 @@ for (const section of SECTIONS) {
 master.addEventListener('change', () => {
   chrome.storage.sync.set({ enabled: master.checked });
   list.classList.toggle('off', !master.checked);
+  pauseBar.classList.toggle('off', !master.checked);
 });
 
 chrome.storage.sync.get(DX_DEFAULTS, (settings) => {
   master.checked = settings.enabled;
   list.classList.toggle('off', !settings.enabled);
+  pauseBar.classList.toggle('off', !settings.enabled);
   for (const input of list.querySelectorAll('input[data-key]')) {
     input.checked = !!settings[input.dataset.key];
   }
+});
+
+// --- Pause (temporary snooze, independent of the master enable/disable) ---
+
+let countdownTimer = null;
+
+function formatRemaining(ms) {
+  const totalSeconds = Math.max(0, Math.round(ms / 1000));
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function showPauseControls() {
+  clearInterval(countdownTimer);
+  countdownTimer = null;
+  pauseControls.hidden = false;
+  pauseCustomRow.hidden = true;
+  pauseActiveRow.hidden = true;
+}
+
+function showPauseActive(pauseUntil) {
+  pauseControls.hidden = true;
+  pauseCustomRow.hidden = true;
+  pauseActiveRow.hidden = false;
+  clearInterval(countdownTimer);
+  const tick = () => {
+    const remaining = pauseUntil - Date.now();
+    if (remaining <= 0) {
+      showPauseControls();
+      return;
+    }
+    pauseCountdown.textContent = formatRemaining(remaining);
+  };
+  tick();
+  countdownTimer = setInterval(tick, 1000);
+}
+
+function startPause(minutes) {
+  const clamped = Math.min(480, Math.max(1, Math.round(minutes) || 5));
+  const pauseUntil = Date.now() + clamped * 60000;
+  chrome.storage.local.set({ pauseUntil });
+  showPauseActive(pauseUntil);
+}
+
+pause5.addEventListener('click', () => startPause(5));
+
+pauseCustomBtn.addEventListener('click', () => {
+  pauseCustomRow.hidden = !pauseCustomRow.hidden;
+  if (!pauseCustomRow.hidden) pauseMinutes.focus();
+});
+
+pauseCustomCancel.addEventListener('click', () => {
+  pauseCustomRow.hidden = true;
+});
+
+pauseCustomStart.addEventListener('click', () => {
+  startPause(Number(pauseMinutes.value));
+});
+
+pauseResumeBtn.addEventListener('click', () => {
+  chrome.storage.local.remove('pauseUntil');
+  showPauseControls();
+});
+
+chrome.storage.local.get({ pauseUntil: 0 }, ({ pauseUntil }) => {
+  if (pauseUntil > Date.now()) showPauseActive(pauseUntil);
 });

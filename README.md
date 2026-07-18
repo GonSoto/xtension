@@ -43,6 +43,18 @@ browser profile (`chrome.storage.sync`).
 
 Plus a master switch in the popup header to disable everything at once.
 
+## Pause
+
+Two buttons at the top of the popup let you see the full, unfiltered site temporarily
+without touching your saved toggle preferences:
+
+- **Pause 5 min** — one click, resumes automatically.
+- **Pause…** — pick a custom number of minutes (up to 8 hours).
+
+While paused, the popup shows a live countdown and a **Resume now** button. The pause
+state lives in `chrome.storage.local` (device-local, not synced) and auto-expires on its
+own — no need to remember to turn anything back on.
+
 ## How it works
 
 - **CSS-driven hiding** ([src/hide.css](src/hide.css)): the content script mirrors your
@@ -54,6 +66,11 @@ Plus a master switch in the popup header to disable everything at once.
   that marks elements with `data-dx-hidden`.
 - **SPA awareness**: X never reloads the page, so a route watcher (Navigation API +
   fallback polling) keeps page-scoped rules (home vs. post vs. explore) accurate.
+- **Responsive-layout coverage**: X restructures primary navigation by window width —
+  labeled sidebar → icon-only rail → bottom tab bar, plus items can move into the "More"
+  flyout menu. Nav-related toggles match on `href`/`data-testid` alone (guarded so they
+  never reach into a post's own content), rather than depending on a specific container,
+  so they hold up across all of those layouts.
 
 ## Caveats
 
