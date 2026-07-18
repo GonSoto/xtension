@@ -4,3 +4,4 @@ out/
 *.vsix
 .env
 .claude/
+submission.md
