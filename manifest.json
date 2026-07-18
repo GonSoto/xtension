@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Focus for X",
+  "name": "Xtension",
   "version": "1.0.0",
-  "description": "Unhook-style distraction blocker for X (Twitter): hide the feed, trends, suggestions, ads, Grok and more — you choose what stays.",
+  "description": "Complete distraction blocker for X (Twitter): hide the feed, trends, suggestions, ads, Grok and more — you choose what stays.",
   "permissions": ["storage"],
   "icons": {
     "16": "icons/icon16.png",
