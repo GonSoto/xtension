@@ -1,0 +1,154 @@
+/* Focus for X — all hiding rules.
+   Every rule is gated on html[data-dx-on] (master switch) plus the attribute
+   for its toggle, set by src/content.js. Page-specific rules are additionally
+   gated on html[data-dx-page="..."]. */
+
+/* Anything the content script marked (ads, badges, "Discover more"). */
+html[data-dx-on] [data-dx-hidden] {
+  display: none !important;
+}
+
+/* --- Home ---------------------------------------------------------------- */
+
+/* Hide the home timeline and its For You / Following tab bar. */
+html[data-dx-on][data-dx-hide-feed][data-dx-page="home"] main [data-testid="primaryColumn"] section[role="region"],
+html[data-dx-on][data-dx-hide-feed][data-dx-page="home"] main [data-testid="primaryColumn"] nav[role="navigation"] {
+  display: none !important;
+}
+
+/* Hide only the "For You" tab (always the first tab on home). */
+html[data-dx-on][data-dx-hide-foryou][data-dx-page="home"] main [data-testid="primaryColumn"] div[role="tablist"] > div:first-child {
+  display: none !important;
+}
+
+/* --- Right sidebar ------------------------------------------------------- */
+
+html[data-dx-on][data-dx-hide-sidebar] [data-testid="sidebarColumn"] {
+  display: none !important;
+}
+
+/* Trends / "What's happening" card. */
+html[data-dx-on][data-dx-hide-trends] [data-testid="sidebarColumn"] section:has([data-testid="trend"]),
+html[data-dx-on][data-dx-hide-trends] [data-testid="sidebarColumn"] div[aria-label]:has([data-testid="trend"]) {
+  display: none !important;
+}
+
+/* "Who to follow" / "You might like" cards, and inline follow suggestions
+   injected into the home timeline. The bordered card wrapper around the aside
+   is hidden too (guards make sure a wrapper holding the whole sidebar never
+   matches); content.js additionally collapses deeper wrappers. */
+html[data-dx-on][data-dx-hide-wtf] [data-testid="sidebarColumn"] aside:has([data-testid="UserCell"]),
+html[data-dx-on][data-dx-hide-wtf] [data-testid="sidebarColumn"] div:has(> aside [data-testid="UserCell"]):not(:has([data-testid="trend"])):not(:has(form[role="search"])),
+html[data-dx-on][data-dx-hide-wtf][data-dx-page="home"] main [data-testid="primaryColumn"] [data-testid="cellInnerDiv"]:has([data-testid="UserCell"]) {
+  display: none !important;
+}
+
+/* Premium upsell cards in the sidebar (including their bordered wrapper) and
+   banners injected into the home feed. */
+html[data-dx-on][data-dx-hide-premium] [data-testid="sidebarColumn"] aside:has(a[href^="/i/premium"]),
+html[data-dx-on][data-dx-hide-premium] [data-testid="sidebarColumn"] div:has(> aside a[href^="/i/premium"]):not(:has([data-testid="trend"])):not(:has(form[role="search"])),
+html[data-dx-on][data-dx-hide-premium][data-dx-page="home"] main [data-testid="primaryColumn"] [data-testid="cellInnerDiv"]:has(a[href^="/i/premium"]) {
+  display: none !important;
+}
+
+/* --- Left navigation ----------------------------------------------------- */
+
+html[data-dx-on][data-dx-hide-nav-explore] header[role="banner"] nav a[href="/explore"],
+html[data-dx-on][data-dx-hide-nav-explore] header[role="banner"] nav a[data-testid="AppTabBar_Explore_Link"] {
+  display: none !important;
+}
+
+/* Communities / Jobs / Premium can live in the nav bar itself or inside the
+   "More" dropdown menu (rendered in a portal, outside the header), depending
+   on the account — cover both. */
+html[data-dx-on][data-dx-hide-nav-communities] header[role="banner"] nav a[href$="/communities"],
+html[data-dx-on][data-dx-hide-nav-communities] a[role="menuitem"][href$="/communities"],
+html[data-dx-on][data-dx-hide-nav-communities] [data-testid="Dropdown"] a[href$="/communities"] {
+  display: none !important;
+}
+
+html[data-dx-on][data-dx-hide-nav-premium] header[role="banner"] nav a[href^="/i/premium"],
+html[data-dx-on][data-dx-hide-nav-premium] header[role="banner"] nav a[href^="/i/verified-orgs"],
+html[data-dx-on][data-dx-hide-nav-premium] header[role="banner"] nav a[href^="/i/monetization"],
+html[data-dx-on][data-dx-hide-nav-premium] a[role="menuitem"][href^="/i/premium"],
+html[data-dx-on][data-dx-hide-nav-premium] a[role="menuitem"][href^="/i/verified-orgs"],
+html[data-dx-on][data-dx-hide-nav-premium] a[role="menuitem"][href^="/i/monetization"],
+html[data-dx-on][data-dx-hide-nav-premium] [data-testid="Dropdown"] a[href^="/i/premium"],
+html[data-dx-on][data-dx-hide-nav-premium] [data-testid="Dropdown"] a[href^="/i/verified-orgs"],
+html[data-dx-on][data-dx-hide-nav-premium] [data-testid="Dropdown"] a[href^="/i/monetization"] {
+  display: none !important;
+}
+
+html[data-dx-on][data-dx-hide-nav-jobs] header[role="banner"] nav a[href^="/jobs"],
+html[data-dx-on][data-dx-hide-nav-jobs] a[role="menuitem"][href^="/jobs"],
+html[data-dx-on][data-dx-hide-nav-jobs] [data-testid="Dropdown"] a[href^="/jobs"] {
+  display: none !important;
+}
+
+/* --- Grok, everywhere ---------------------------------------------------- */
+
+html[data-dx-on][data-dx-hide-grok] a[href="/i/grok"],
+html[data-dx-on][data-dx-hide-grok] a[href^="/i/grok"],
+html[data-dx-on][data-dx-hide-grok] [data-testid="GrokDrawer"],
+html[data-dx-on][data-dx-hide-grok] [data-testid="GrokDrawerHeader"],
+html[data-dx-on][data-dx-hide-grok] [data-testid*="grok"],
+html[data-dx-on][data-dx-hide-grok] [data-testid*="Grok"],
+html[data-dx-on][data-dx-hide-grok] button[aria-label*="Grok"] {
+  display: none !important;
+}
+
+/* --- Content ------------------------------------------------------------- */
+
+/* Promoted posts that carry the placementTracking wrapper (the text-label
+   detection in content.js catches the rest). */
+html[data-dx-on][data-dx-hide-ads] [data-testid="cellInnerDiv"]:has([data-testid="placementTracking"]) {
+  display: none !important;
+}
+
+/* Engagement counts in the action bar under every post (reply, repost, like,
+   bookmark) plus the view-count analytics link. */
+html[data-dx-on][data-dx-hide-metrics] article [role="group"] [data-testid="app-text-transition-container"],
+html[data-dx-on][data-dx-hide-metrics] article a[href$="/analytics"] {
+  display: none !important;
+}
+
+/* Floating DM drawer in the bottom-right corner. X renames this test id
+   between versions; content.js has a positional fallback for the rest. */
+html[data-dx-on][data-dx-hide-dm] [data-testid="DMDrawer"],
+html[data-dx-on][data-dx-hide-dm] [data-testid="DmDrawer"],
+html[data-dx-on][data-dx-hide-dm] [data-testid="ChatDrawer"],
+html[data-dx-on][data-dx-hide-dm] [data-testid="MessagesDrawer"] {
+  display: none !important;
+}
+
+/* --- Feed-hidden placeholder --------------------------------------------- */
+
+#dx-zen {
+  max-width: 420px;
+  margin: 15vh auto 0;
+  padding: 0 24px;
+  text-align: center;
+}
+
+#dx-zen .dx-zen-emoji {
+  font-size: 40px;
+  margin-bottom: 16px;
+}
+
+#dx-zen h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+#dx-zen p {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #71767b;
+  margin: 0 0 8px;
+}
+
+#dx-zen .dx-zen-hint {
+  font-size: 13px;
+  opacity: 0.7;
+}
