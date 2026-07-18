@@ -33,7 +33,7 @@ const SECTIONS = [
   {
     title: 'Content',
     items: [
-      ['hideAds', 'Hide ads', 'Promoted posts in every timeline'],
+      ['hideAds', 'Hide ads', 'Promoted & paid-partnership posts'],
       ['hideDiscoverMore', 'Hide "Discover more"', 'Algorithmic suggestions under posts'],
       ['hideMetrics', 'Hide engagement counts', 'Replies, reposts, likes, views'],
       ['hideDMDrawer', 'Hide message drawer', 'The floating DM bar, bottom-right'],

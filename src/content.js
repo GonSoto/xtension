@@ -77,17 +77,25 @@
   // --- JS-driven features -------------------------------------------------
 
   function isAdArticle(article) {
-    // X always renders the "Ad"/"Promoted" disclosure inside the post's own
-    // byline row (next to the name/handle/timestamp) — never elsewhere in the
-    // body. Scoping to the first byline in the article (i.e. the outer post's
-    // own, by document order) means a quote-tweet or reply that merely
-    // embeds a promoted tweet further down can't trigger a false match,
-    // regardless of whether that embed happens to use a nested <article> tag.
+    // Promoted posts: X renders the "Ad"/"Promoted" disclosure inside the
+    // post's own byline row (next to the name/handle/timestamp) — never
+    // elsewhere in the body. Scoping to the first byline in the article
+    // (i.e. the outer post's own, by document order) means a quote-tweet or
+    // reply that merely embeds a promoted tweet further down can't trigger a
+    // false match.
     const byline = article.querySelector('[data-testid="User-Name"]');
-    if (!byline) return false;
-    for (const span of byline.querySelectorAll('span')) {
-      if (AD_LABELS.has(span.textContent.trim())) return true;
+    if (byline) {
+      for (const span of byline.querySelectorAll('span')) {
+        if (AD_LABELS.has(span.textContent.trim())) return true;
+      }
     }
+    // Paid partnerships ("Paid partnership" / "Colaboración pagada" / …):
+    // a separate kind of sponsored post whose disclosure is a footer link to
+    // X's paid-partnerships policy. Matching the href instead of the label
+    // text is locale-independent. Exclude links inside the post's own text,
+    // so merely linking to the policy page doesn't get a post hidden.
+    const disclosure = article.querySelector('a[href*="paid-partnerships-policy"]');
+    if (disclosure && !disclosure.closest('[data-testid="tweetText"]')) return true;
     return false;
   }
 

@@ -35,7 +35,7 @@ browser profile (`chrome.storage.sync`).
 | Nav | Hide Premium & Verified Orgs | **on** |
 | Nav | Hide Jobs | **on** |
 | Nav | Hide notification badges (incl. tab-title count) | **on** |
-| Content | Hide ads / promoted posts | **on** |
+| Content | Hide ads (promoted + paid-partnership posts) | **on** |
 | Content | Hide "Discover more" suggestions under posts | **on** |
 | Content | Hide engagement counts (replies, reposts, likes, views) | off |
 | Content | Hide floating message drawer | **on** |
